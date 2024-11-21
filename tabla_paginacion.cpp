@@ -28,6 +28,7 @@ private:
     unordered_map<int, PageEntry> table;  // Tabla hash para almacenar las entradas de página
     unordered_set<int> usedFrames;        // Rastrear marcos ocupados
     const int numFrames;                  // Número de marcos físicos (constante)
+    int pageFaults = 0;                   // Contador de fallos de página
 
 public:
     /**
@@ -37,11 +38,11 @@ public:
      */
     PageTable(int frames) : numFrames(frames) {}
 
-    /*
-    Método para insertar una página en la tabla
-    @param pageNumber: Número de página
-    @param frameNumber: Número de marco físico asociado
-    */
+    /**
+     * @brief Método para insertar una página en la tabla
+     * @param pageNumber: Número de página
+     * @param frameNumber: Número de marco físico asociado
+     */
     void insertPage(int pageNumber, int frameNumber) {
         
         // Verificar si el número de marco es válido
@@ -72,15 +73,16 @@ public:
         PageEntry entry = {frameNumber, true};
         table[pageNumber] = entry;
         usedFrames.insert(frameNumber);
+        pageFaults++; // Incrementar el contador de fallos de página
 
         cout << "Página " << pageNumber << " mapeada al marco " << frameNumber << ".\n";
     }
 
-    /*
-    Método para buscar una página en la tabla
-    @param pageNumber: Número de página a buscar
-    @return Número de marco físico asociado a la página, o -1 si no se encuentra
-    */
+    /**
+     * @brief Método para buscar una página en la tabla
+     * @param pageNumber: Número de página a buscar
+     * @return Número de marco físico asociado a la página, o -1 si no se encuentra
+     */
     int getFrame(int pageNumber) const {
         auto it = table.find(pageNumber);
         if (it != table.end() && it->second.valid) {
@@ -91,25 +93,26 @@ public:
         return -1;
     }
 
-    /*
-    Método para eliminar una página de la tabla
-    @param pageNumber: Número de página a eliminar
-    */
+    /**
+     * @brief Método para eliminar una página de la tabla
+     * @param pageNumber: Número de página a eliminar
+     */
     void removePage(int pageNumber) {
         auto it = table.find(pageNumber);
         if (it != table.end()) {
             usedFrames.erase(it->second.frameNumber);
             table.erase(it);
             cout << "Página " << pageNumber << " eliminada.\n";
+            _sleep(1000); // Simular un retraso de 1 segundo
         } else {
             cout << "Página " << pageNumber << " no encontrada.\n";
         }
     }
 
-    /*
-    Método para invalidar una página (simula la expulsión de una página)
-    @param pageNumber: Número de página a invalidar
-    */
+    /**
+     * @brief Método para invalidar una página
+     * @param pageNumber: Número de página a invalidar
+     */
     void invalidatePage(int pageNumber) {
         auto it = table.find(pageNumber);
         if (it != table.end()) {
@@ -120,9 +123,21 @@ public:
         }
     }
 
-    /*
-    Método para mostrar el contenido de la tabla
-    */
+    /**
+     * @brief Método para reemplazar una página por otra
+     * @param pageNumber: Número de página por ingresar
+     * @param pageToReplace: Número de página a reemplazar
+     */
+    void replacePage(int pageNumber, int pageToReplace) {
+        int frameNumber = getFrame(pageToReplace);
+        removePage(pageToReplace);
+        insertPage(pageNumber, frameNumber);
+        cout << "Página " << pageNumber << " reemplazada por el marco " << frameNumber << ".\n";
+    }
+
+    /**
+     * @brief Método para mostrar el contenido de la tabla
+     */
     void displayTable() const {
         cout << "Contenido de la tabla de páginas:\n";
         for (const auto& pair : table) {
