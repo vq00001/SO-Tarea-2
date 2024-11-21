@@ -2,6 +2,8 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <cstring>
+#include "tabla_paginacion.cpp"
 
 using namespace std;
 
@@ -30,10 +32,7 @@ vector<int> readReferences(const string &filename) {
     while (file >> ref) {
         references.push_back(ref);
     }
-    cout << "Referencias leídas: " << references.size() << endl;
-    for (int i = 0; i < min(10, (int)references.size()); i++) {
-        cout << references[i] << " ";
-    }
+    file.close();
     return references;
 }
 
@@ -64,6 +63,22 @@ int main(int argc, char *argv[]) {
     try {
         ReplacementAlgorithm algo = parseAlgorithm(algorithm);
         vector<int> references = readReferences(referenceFile);
+
+        // Crear la tabla de páginas con el número de marcos especificado
+        PageTable pageTable(frames);
+
+
+        // Insertar las referencias en la tabla de páginas
+        for (size_t i = 0; i < references.size(); i++) {
+            int pageNumber = references[i];
+            if (pageTable.getFrame(pageNumber) == -1) {
+                cout << "Insertando página " << pageNumber << endl;
+                pageTable.insertPage(pageNumber, i % frames);
+            }
+        }
+
+        pageTable.displayTable();  // Mostrar la tabla de páginas
+
     } catch (const exception &e) {
         cerr << "Error: " << e.what() << endl;
         return 1;

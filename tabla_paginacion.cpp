@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
+#include <unordered_set>
 
 using namespace std;
 
@@ -14,7 +15,8 @@ struct PageEntry {
 class PageTable {
 private:
     unordered_map<int, PageEntry> table;  // Tabla hash para almacenar las entradas de página
-    int numFrames;                        // Número de marcos físicos
+    unordered_set<int> usedFrames;        // Rastrear marcos ocupados
+    const int numFrames;                  // Número de marcos físicos (constante)
 
 public:
     // Constructor
@@ -26,24 +28,36 @@ public:
     @param frameNumber: Número de marco físico asociado
     */
     void insertPage(int pageNumber, int frameNumber) {
-        if (table.find(pageNumber) != table.end()) {
-            cout << "Página " << pageNumber << " ya existe.\n";
+        
+        // Verificar si el número de marco es válido
+        if (frameNumber >= numFrames || frameNumber < 0) {
+            cout << "Número de marco inválido.\n";
             return;
         }
 
-        if (table.size() >= numFrames) {
+        // Verificar si la tabla de páginas está llena
+        if (static_cast<int>(table.size()) >= numFrames) {
             cout << "Tabla de páginas llena. Se necesita expulsar una página.\n";
             return;
         }
 
-        if (frameNumber >= numFrames || frameNumber < 0) {
-            cout << "Número de marco inválido.\n";
+        // Verificar si el marco ya está ocupado
+        if (usedFrames.find(frameNumber) != usedFrames.end()) {
+            cout << "Error: El marco " << frameNumber << " ya está ocupado.\n";
+            return;
+        }
+
+        // Verificar si la página ya está asignada
+        if (table.find(pageNumber) != table.end()) {
+            cout << "La página " << pageNumber << " ya está asignada al marco " << table[pageNumber].frameNumber << ".\n";
             return;
         }
 
         // Crear una nueva entrada de página
         PageEntry entry = {frameNumber, true};
         table[pageNumber] = entry;
+        usedFrames.insert(frameNumber);
+
         cout << "Página " << pageNumber << " mapeada al marco " << frameNumber << ".\n";
     }
 
@@ -58,8 +72,23 @@ public:
             cout << "Página " << pageNumber << " encontrada en el marco " << it->second.frameNumber << ".\n";
             return it->second.frameNumber;
         }
-        cout << "Página " << pageNumber << " no está en memoria.\n";
-        return -1; // Indica fallo de página
+        cout << "Página " << pageNumber << " no encontrada.\n";
+        return -1;
+    }
+
+    /*
+    Método para eliminar una página de la tabla
+    @param pageNumber: Número de página a eliminar
+    */
+    void removePage(int pageNumber) {
+        auto it = table.find(pageNumber);
+        if (it != table.end()) {
+            usedFrames.erase(it->second.frameNumber);
+            table.erase(it);
+            cout << "Página " << pageNumber << " eliminada.\n";
+        } else {
+            cout << "Página " << pageNumber << " no encontrada.\n";
+        }
     }
 
     /*
@@ -86,39 +115,3 @@ public:
         }
     }
 };
-
-int main() { // Prueba de la tabla de páginas
-    // Crear una tabla de páginas con 3 marcos iniciales
-    PageTable pageTable(3);
-
-    // Insertar páginas
-    pageTable.insertPage(1, 0);
-    pageTable.insertPage(2, 1);
-    pageTable.insertPage(3, 2);
-
-    // Mostrar el contenido de la tabla
-    pageTable.displayTable();
-
-    // Insertar una página que ya existe
-    pageTable.insertPage(1, 3);
-
-    // Buscar una página
-    pageTable.getFrame(1);
-
-    // Buscar una página que no está en memoria
-    pageTable.getFrame(4);
-
-    // Invalidar una página
-    pageTable.invalidatePage(2);
-
-    // Buscar una página que ha sido invalidada
-    pageTable.getFrame(2);
-
-    // Invalidar una página que no existe
-    pageTable.invalidatePage(5);
-
-    // Mostrar el contenido de la tabla nuevamente
-    pageTable.displayTable();
-
-    return 0;
-}
