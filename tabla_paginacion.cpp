@@ -5,13 +5,24 @@
 
 using namespace std;
 
-// Estructura para representar una entrada en la tabla de páginas
+/**
+ * @brief Representa una entrada en la tabla de paginación.
+ *
+ * Esta estructura contiene información sobre una entrada en la tabla de paginación,
+ * incluyendo el número de marco físico asociado y un bit de validez.
+ */
 struct PageEntry {
     int frameNumber;  // Número de marco físico asociado
-    bool valid;       // Bit de validez
+    bool valid;       // Bit de validez que indica si la entrada es válida (true) o no (false).
 };
 
-// Clase para la tabla de paginación
+/**
+ * @brief Clase que representa una tabla de páginas.
+ *
+ * Esta clase implementa una tabla de páginas para un sistema de paginación simple.
+ * La tabla de páginas mapea números de página a números de marco físico y mantiene
+ * un conjunto de marcos físicos ocupados.
+ */
 class PageTable {
 private:
     unordered_map<int, PageEntry> table;  // Tabla hash para almacenar las entradas de página
@@ -19,7 +30,11 @@ private:
     const int numFrames;                  // Número de marcos físicos (constante)
 
 public:
-    // Constructor
+    /**
+     * @brief Constructor de la clase PageTable.
+     * 
+     * @param frames Número de marcos físicos en el sistema.
+     */
     PageTable(int frames) : numFrames(frames) {}
 
     /*
