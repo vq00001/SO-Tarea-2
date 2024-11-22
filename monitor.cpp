@@ -1,14 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
+#include <bits/stdc++.h>
 #include <sys/time.h>
-#include <string.h>
-#include <semaphore.h>
-#include <iostream>
-#include <atomic>
-#include <chrono>
-#include <bits/std_thread.h>
 using namespace std;
 
 #define MAX_QUEUE_SIZE 5  // Tamaño máximo de la cola
@@ -34,13 +25,18 @@ class Monitor{
         pthread_mutex_t mutex;        // Mutex para protección de la cola
         pthread_cond_t not_empty;     // Variable de condición para la cola no vacía
         pthread_cond_t not_full;      // Variable de condición para la cola no llena
+       
+        int tiempo_espera;
 
     public:
 
-        Monitor(){
+        Monitor(int sec_espera){
             pthread_mutex_init(&mutex, NULL);
             pthread_cond_init(&not_empty, NULL);
             pthread_cond_init(&not_full, NULL);
+
+            tiempo_espera = sec_espera;
+            // spinlock.init(&cola, sec_espera);
         }
 
         void printQueue() {
@@ -64,30 +60,51 @@ class Monitor{
             // Insertar el valor
             printf("Productor: insertando %d\n", value);
 
+
+            //
+            // llamar a funcion de cola circular
             cola.buffer[cola.rear] = value;
             cola.rear = (cola.rear + 1) % MAX_QUEUE_SIZE;
             cola.count++;
-            
+            // llamar func
+            //
+
             printQueue();
 
             // Señalar que la cola no está vacía
             pthread_cond_signal(&not_empty);
-
-            pthread_mutex_unlock(&mutex);
-        
+            pthread_mutex_unlock(&mutex);        
         }
         
 
         int extract(){
+
             pthread_mutex_lock(&mutex);
+            
+            // inicializar variables de tiempo
+            auto start = chrono::high_resolution_clock::now();
+            auto end = start + std::chrono::seconds(tiempo_espera);  // Tiempo futuro en el que se espera
+            
+            timespec timeout;
+            timeout.tv_sec = std::chrono::duration_cast<std::chrono::seconds>(end.time_since_epoch()).count();
+            timeout.tv_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(end.time_since_epoch()).count() % 1000000000;
+
 
             // Esperar si la cola está vacía
             while (cola.count == 0) {
-                pthread_cond_wait(&not_empty, &mutex);
-            }
+                int rc = pthread_cond_timedwait(&not_empty, &mutex, &timeout);
 
-            // Extraer el valor
+                // Si rc es 0, significa que el hilo fue despertado por la condición
+                // Si rc es ETIMEDOUT, significa que el hilo terminó por el tiempo de espera
+                if (rc == ETIMEDOUT) {
+                    printf("Consumidor: tiempo de espera agotado, terminando\n");
+                    pthread_mutex_unlock(&mutex);
+                    return -1; // O cualquier valor que indique que el consumidor terminó sin éxito
+                }
+            }
+    
             
+            // Extraer el valor
             int value = cola.buffer[cola.front];
 
             printf("Consumidor: extrayendo %d\n", value);
@@ -99,7 +116,7 @@ class Monitor{
             // Señalar que la cola no está llena
             pthread_cond_signal(&not_full);
             pthread_mutex_unlock(&mutex);
-
+            
             return value;
         }
 } ;
@@ -110,7 +127,10 @@ class Monitor{
 void* producer(void* arg){
 
     Monitor *q = (Monitor*)arg;
-    q->insert(1);    
+    usleep(50000);    
+    for(int i = 0; i < 3; i++)
+        q->insert(i);
+
     return NULL;
 }
 
@@ -119,9 +139,8 @@ void* consumer(void* arg) {
     Monitor *q = (Monitor*)arg;            
 
     // Extraer el valor
-    int val = q->extract();
-
-    usleep(150000);  // Simula el tiempo de consumo
+    for(int i = 0; i < 3; i++)
+        q->extract();
 
     return NULL;
 }
@@ -137,7 +156,7 @@ int main(int argc, char* argv[]) {
     }
     
     // identificar parametros
-    for(int i = 1; i < argc - 1; i++) {
+    for(int i = 1; i < argc - 1; i += 2) {
 
         if(strcmp(argv[i], "-p") == 0) {cant_productores = atoi(argv[i+1]);}
         else if(strcmp(argv[i], "-c") == 0) {cant_consumidores = atoi(argv[i+1]);}
@@ -152,7 +171,7 @@ int main(int argc, char* argv[]) {
     gettimeofday(&tval_inicio, NULL);
 
     // inicializar variables
-    Monitor queue;
+    Monitor queue(tiempo_espera);
     
     int rc;        
 
@@ -191,16 +210,14 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    cout << "cant productores" << cant_productores << endl;
 
+    // esperar que todos los hilos terminen
     for(int i = 0; i < cant_productores; i++){
         pthread_join(productores[i], NULL);
-    // pthread_join(consumer_thread, NULL);
     }
    
     for(int i = 0; i < cant_consumidores; i++){
         pthread_join(consumidores[i], NULL);
-    // pthread_join(consumer_thread, NULL);
     }
 
    
