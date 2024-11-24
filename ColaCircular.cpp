@@ -1,9 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+//#include <unistd.h>
 
 class colaCircular {
+	std::ofstream registro;
+	std::string archivo = "registros.txt";
 private:
     int elementos;
 	int large;
@@ -11,18 +17,83 @@ private:
 	int frente;
 	int* cola;
 public:
+
 	colaCircular(int largo){
 		this->elementos = 0;
 		this->large = largo;
 		this->final = 0;
 		this->frente = 0;
 		this->cola = (int*)calloc(large,sizeof(int));
+		std::stringstream aux ;
+		aux << "\n\n===================Cargando cola numero:"<<this <<"=======================\n\n";
+		std::string inicio = aux.str();
+		this->registrar(inicio);
 	}
     void printCola(){
 		for (int i = 0; i < this->large; ++i){
 			printf("%d ",this->cola[i]);
 		}
 		printf("\n");
+	}
+
+	void registrar(std::string content){
+		registro.open(archivo,std::ios::out | std::ios::app);
+		if (!registro){
+			printf("Error al registrar...");
+			return;
+		}
+		registro << content << std::endl;
+		registro.close();
+	}
+	void registrarCola(){
+		registro.open(archivo,std::ios::out | std::ios::app);
+		if (!registro){
+			printf("Error al registrar...");
+			return;
+		}
+		int aux= this->final ;
+		if (this->final==0) aux= this->large;
+			
+		if (aux > this->frente){
+			for (int i = 0; i < this->large; ++i){
+				if (i >= this->frente && i < aux){
+					registro << this->cola[i] << " ";
+				}
+				else{
+					registro << "0 ";
+				}
+			}
+			registro << "\n";
+		}
+		else{
+			for (int i = 0; i < this->large; ++i){
+				if (i < aux || i >= this->frente){
+					registro << this->cola[i] << " ";
+				}
+				else{
+					registro << "0 ";
+				}
+			}
+			registro << "\n";
+		}
+		for (int i = 0; i < this->large; ++i){
+			if(i == this->frente && i == this->final){
+				registro << "B ";
+			}
+			else if(i == this->frente){
+				registro << "I ";
+			}
+			else if(i== this->final){
+				registro << "F " ;
+			}
+			else{
+				registro << "_ ";
+			}
+		}
+		registro << "\n" ;
+		printf("\n");
+
+		registro.close();
 	}
 
 	void reducir(){
@@ -37,8 +108,10 @@ public:
 				printf("%d\n",*(ptr));
 				this->cola = ptr;
 				this->large = this->large / 2;
-
-				printf("La cola se ha reducido con exito y ahora su tamaño es %d \n",this->large);
+				std::stringstream aux ;
+				aux << "La cola se ha reducido con exito y ahora su tamaño es "<<this->large <<"\n";
+				std::string mensaje = aux.str();
+				registrar(mensaje);
 			}
 			else{
 				printf("algo ocurrio...\n");
@@ -62,8 +135,10 @@ public:
 				printf("%d\n",*(ptr));
 				this->cola = ptr;
 				this->large = this->large / 2;
-
-				printf("La cola se ha reducido con exito y ahora su tamaño es %d \n",this->large);
+				std::stringstream aux ;
+				aux << "La cola se ha reducido con exito y ahora su tamaño es "<<this->large <<"\n";
+				std::string mensaje = aux.str();
+				registrar(mensaje);
 			}
 			else{
 				printf("algo ocurrio...\n");
@@ -80,7 +155,10 @@ public:
 				this->cola = ptr;
 				this->large = this->large * 2;
 
-				printf("La cola se ha duplicado con exito y ahora su tamaño es %d \n",this->large);
+				std::stringstream aux ;
+				aux << "La cola se ha duplicado con exito y ahora su tamaño es "<<this->large <<"\n";
+				std::string mensaje = aux.str();
+				registrar(mensaje);
 			}
 			else{
 				printf("algo ocurrio...\n");
@@ -107,7 +185,10 @@ public:
 					printf("%d\n", buffer[i]);
 				}
 				printf("\nfin.. aux: %d\n", aux);
-				printf("La cola se ha duplicado con exito y ahora su tamaño es %d \n",this->large);
+				std::stringstream aux ;
+				aux << "La cola se ha reducido con exito y ahora su tamaño es "<<this->large <<"\n";
+				std::string mensaje = aux.str();
+				registrar(mensaje);
 			}
 			else{
 				printf("algo ocurrio...\n");
@@ -116,6 +197,7 @@ public:
 	}
 
 	void addToCola(int n){
+		registrar("----------------------\n");
 		if(this->elementos >= this->large ){
 			if (this->final == 0) this->final = this->large;
 			expandir();
@@ -125,10 +207,17 @@ public:
 		this->cola[this->final] = n;
 		this->final= (this->final + 1)%this->large;
 		this->elementos= this->elementos+1;
+		std::stringstream aux ;
+		aux << "Se añadio: " << n << "\n";
+		std::string mensaje = aux.str();
+		registrar(mensaje);
+		registrarCola();
+		registrar("----------------------\n");
 		
 	}
 
 	int quitarElemento(){
+		registrar("-----------------------\n");
 		printf("elementos : %d\n",this->elementos);
 		if(this->elementos == 0){
 			printf("entre aca\n");
@@ -141,6 +230,12 @@ public:
 		if(this->elementos == this->large/4 && this->large > 1){
 			reducir();
 		}
+		std::stringstream aux ;
+		aux << "Se elimino: " << n << "\n";
+		std::string mensaje = aux.str();
+		registrar(mensaje);
+		registrarCola() ;
+		registrar("-----------------------\n");
 		return n;
 	}
 	int* getCola(){
