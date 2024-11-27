@@ -1,4 +1,5 @@
 #include "algoritmos_reemplazo.h"
+#include "tabla_paginacion.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -47,31 +48,56 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    vector<int> referencias = cargarReferencias(archivoReferencias);
-    PageTable tablaPaginacion(marcos);
 
 
-    if (algoritmo == "FIFO") {
-        for (int ref : referencias) {
-            tablaPaginacion.insertarFIFO(ref);
+
+    try { // Iniciar simulación
+                    
+        vector<int> referencias = cargarReferencias(archivoReferencias);    
+        PageTable tablaPaginacion(marcos);  
+
+        // Insertar las referencias en la tabla de páginas (Simulación para pruebas)
+        for (size_t i = 0; i < referencias.size(); i++) {
+            int pageNumber = referencias[i];
+            if (tablaPaginacion.getFrame(pageNumber) == -1) {
+                cout << "Insertando página " << pageNumber << endl;
+                tablaPaginacion.insertPage(pageNumber, i % marcos);
+            }
         }
-    } else if (algoritmo == "LRU") {
-        for (int ref : referencias) {
-            tablaPaginacion.insertarLRU(ref);
+
+        tablaPaginacion.displayTable();  // Mostrar la tabla de páginas
+
+
+                
+        if (algoritmo == "FIFO") {
+            for (int ref : referencias) {
+                tablaPaginacion.insertarFIFO(ref);
+            }
+        } else if (algoritmo == "LRU") {
+            for (int ref : referencias) {
+                tablaPaginacion.insertarLRU(ref);
+            }
+        } else if (algoritmo == "CLOCK") {
+            for (int ref : referencias) {
+                tablaPaginacion.insertarReloj(ref);
+            }
+        } else if (algoritmo == "OPTIMAL") {
+            for (size_t i = 0; i < referencias.size(); ++i) {
+                tablaPaginacion.insertarOptimo(referencias[i], referencias, i);
+            }
+        } else {
+            cerr << "Error: Algoritmo no reconocido.\n";
+            return 1;
         }
-    } else if (algoritmo == "CLOCK") {
-        for (int ref : referencias) {
-            tablaPaginacion.insertarReloj(ref);
-        }
-    } else if (algoritmo == "OPTIMAL") {
-        for (size_t i = 0; i < referencias.size(); ++i) {
-            tablaPaginacion.insertarOptimo(referencias[i], referencias, i);
-        }
-    } else {
-        cerr << "Error: Algoritmo no reconocido.\n";
+
+        
+        cout << "Fallos de página: " << tablaPaginacion.obtenerFallosPagina() << endl;  
+
+    } catch (const exception &e) { // Capturar excepciones
+        cerr << "Error: " << e.what() << endl;
         return 1;
     }
 
-    cout << "Fallos de página: " << tablaPaginacion.obtenerFallosPagina() << endl;
+
     return 0;
 }
