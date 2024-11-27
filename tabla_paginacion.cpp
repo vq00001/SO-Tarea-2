@@ -7,14 +7,6 @@
 
 using namespace std;
 
-/**
- * @brief Representa una entrada en la tabla de paginación.
- *
- * Esta estructura contiene información sobre una entrada en la tabla de paginación,
- * incluyendo el número de marco físico asociado y un bit de validez.
- */
- PageTable::PageTable(int numFrames) : numFrames(numFrames) {}
-
 
 /**
  * @brief Clase que representa una tabla de páginas.
