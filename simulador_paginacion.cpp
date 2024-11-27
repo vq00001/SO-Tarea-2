@@ -13,18 +13,27 @@ using namespace std;
  * @param filename Archivo de entrada.
  * @return Vector de referencias de páginas.
  */
-vector<int> cargarReferencias(const string& filename) {
-    vector<int> referencias;
+vector<int> cargarReferencias(const string &filename) {
+   
     ifstream archivo(filename);
+    
     if (!archivo.is_open()) {
-        cerr << "Error: No se pudo abrir el archivo de referencias.\n";
+        throw runtime_error("No se pudo abrir el archivo de referencias");
         exit(EXIT_FAILURE);
     }
-    int pagina;
-    while (archivo >> pagina) {
-        referencias.push_back(pagina);
+    // int pagina;
+    // while (archivo >> pagina) {
+    //     referencias.push_back(pagina);
+    // }
+    // return referencias;
+
+    vector<int> references;
+    int ref;
+    while (archivo >> ref) {
+        references.push_back(ref);
     }
-    return referencias;
+    archivo.close();
+    return references;
 }
 
 int main(int argc, char* argv[]) {
