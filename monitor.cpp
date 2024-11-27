@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 #include <sys/time.h>
+#include "ColaCircular.h"
 using namespace std;
 
 #define MAX_QUEUE_SIZE 5  // Tamaño máximo de la cola
@@ -10,18 +11,11 @@ using namespace std;
 
 // Mostrar el contenido de la cola (solo para depuración)
 
-typedef struct {
-    int buffer[MAX_QUEUE_SIZE]; // cola
-    int front;  // Indice del primer elemento
-    int rear;   // Indice del siguiente espacio vacío
-    int count;  // Número de elementos en la cola
-} Cola;
-
 
 class Monitor{
 
     private:
-        Cola cola;
+        ColaCircular cola;
         pthread_mutex_t mutex;        // Mutex para protección de la cola
         pthread_cond_t not_empty;     // Variable de condición para la cola no vacía
         pthread_cond_t not_full;      // Variable de condición para la cola no llena
@@ -30,22 +24,24 @@ class Monitor{
 
     public:
 
-        Monitor(int sec_espera){
+        Monitor(int sec_espera, int largo_cola){
             pthread_mutex_init(&mutex, NULL);
             pthread_cond_init(&not_empty, NULL);
             pthread_cond_init(&not_full, NULL);
 
             tiempo_espera = sec_espera;
+            cola.init(largo_cola);
+            
             // spinlock.init(&cola, sec_espera);
         }
 
-        void printQueue() {
-            printf("Cola: ");
-            for (int i = 0; i < cola.count; i++) {
-                printf("%d ", cola.buffer[(cola.front + i) % MAX_QUEUE_SIZE]);
-            }
-            printf("\n");
-        }
+        // void printQueue() {
+        //     printf("Cola: ");
+        //     for (int i = 0; i < cola.getElementos(); i++) {
+        //         printf("%d ", cola.buffer[(cola.front + i) % MAX_QUEUE_SIZE]);
+        //     }
+        //     printf("\n");
+        // }
 
         
         void insert(int value){
@@ -53,9 +49,9 @@ class Monitor{
             pthread_mutex_lock(&mutex);
 
             // Esperar si la cola está llena
-            while (cola.count == MAX_QUEUE_SIZE) {
-                pthread_cond_wait(&not_full, &mutex);
-            }
+            // while (cola.count == MAX_QUEUE_SIZE) {
+            //     pthread_cond_wait(&not_full, &mutex);
+            // }
 
             // Insertar el valor
             printf("Productor: insertando %d\n", value);
@@ -63,13 +59,11 @@ class Monitor{
 
             //
             // llamar a funcion de cola circular
-            cola.buffer[cola.rear] = value;
-            cola.rear = (cola.rear + 1) % MAX_QUEUE_SIZE;
-            cola.count++;
+            cola.addToCola(value);
             // llamar func
             //
 
-            printQueue();
+            cola.printCola();
 
             // Señalar que la cola no está vacía
             pthread_cond_signal(&not_empty);
@@ -91,7 +85,7 @@ class Monitor{
 
 
             // Esperar si la cola está vacía
-            while (cola.count == 0) {
+            while (cola.getElementos() == 0) {
                 int rc = pthread_cond_timedwait(&not_empty, &mutex, &timeout);
 
                 // Si rc es 0, significa que el hilo fue despertado por la condición
@@ -99,25 +93,29 @@ class Monitor{
                 if (rc == ETIMEDOUT) {
                     printf("Consumidor: tiempo de espera agotado, terminando\n");
                     pthread_mutex_unlock(&mutex);
+                    this_thread::yield();
                     return -1; // O cualquier valor que indique que el consumidor terminó sin éxito
                 }
             }
     
             
             // Extraer el valor
-            int value = cola.buffer[cola.front];
+            int value = cola.quitarElemento();
 
-            printf("Consumidor: extrayendo %d\n", value);
-            cola.front = (cola.front + 1) % MAX_QUEUE_SIZE;
-            cola.count--;
-
-            printQueue();
+            if (value != -1) {
+                printf("Consumidor: extrayendo %d\n", value);
+                cola.printCola();
+            }
 
             // Señalar que la cola no está llena
-            pthread_cond_signal(&not_full);
+            // pthread_cond_signal(&not_full);
             pthread_mutex_unlock(&mutex);
             
             return value;
+        }
+
+        void liberar_memoria_cola(){
+            free(cola.getCola());
         }
 } ;
 
@@ -139,8 +137,12 @@ void* consumer(void* arg) {
     Monitor *q = (Monitor*)arg;            
 
     // Extraer el valor
-    for(int i = 0; i < 3; i++)
-        q->extract();
+    for(int i = 0; i < 3; i++){
+        int val = q->extract();
+        if(val == -1) {
+            break;
+        }
+    }
 
     return NULL;
 }
@@ -162,7 +164,7 @@ int main(int argc, char* argv[]) {
         else if(strcmp(argv[i], "-c") == 0) {cant_consumidores = atoi(argv[i+1]);}
         else if(strcmp(argv[i], "-s") == 0) {cola_size = atoi(argv[i+1]);}
         else if(strcmp(argv[i], "-t") == 0) {tiempo_espera = atoi(argv[i+1]);       }
-        else { printf("%s es un parametro invalido", argv[i]); exit(1);} 
+        else { printf("%s es un parametro invalido\n", argv[i]); exit(1);} 
         
     }
     
@@ -171,7 +173,7 @@ int main(int argc, char* argv[]) {
     gettimeofday(&tval_inicio, NULL);
 
     // inicializar variables
-    Monitor queue(tiempo_espera);
+    Monitor queue(tiempo_espera, cola_size);
     
     int rc;        
 
@@ -223,6 +225,7 @@ int main(int argc, char* argv[]) {
    
     free(productores);
     free(consumidores);
+    queue.liberar_memoria_cola();
   
     gettimeofday(&tval_fin, NULL);
     timersub(&tval_fin, &tval_inicio, &tval_final);
