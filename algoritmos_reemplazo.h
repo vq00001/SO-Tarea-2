@@ -1,5 +1,5 @@
-#ifndef TABLA_PAGINACION_H
-#define TABLA_PAGINACION_H
+#ifndef ALGORITMOS_REEMPLAZO_H
+#define ALGORITMOS_REEMPLAZO_H
 
 #include <unordered_map>
 #include <queue>

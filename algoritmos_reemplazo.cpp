@@ -1,4 +1,4 @@
-#include "tabla_paginacion.h"
+#include "algoritmos_reemplazo.h"
 #include <iostream>
 #include <algorithm>
 
@@ -10,7 +10,7 @@ int PageTable::obtenerFallosPagina() const {
 
 void PageTable::insertarFIFO(int numeroPagina) {
     if (tabla.size() < numMarcos) {
-        tabla[numeroPagina] = {colaFIFO.size(), true};
+        tabla[numeroPagina] = {static_cast<int>(colaFIFO.size()), true};
         colaFIFO.push(numeroPagina);
         fallosPagina++;
     } else {
@@ -18,7 +18,7 @@ void PageTable::insertarFIFO(int numeroPagina) {
         colaFIFO.pop();
         colaFIFO.push(numeroPagina);
         tabla.erase(reemplazar);
-        tabla[numeroPagina] = {colaFIFO.size() - 1, true};
+        tabla[numeroPagina] = {static_cast<int>(colaFIFO.size()) - 1, true};
         fallosPagina++;
     }
 }
