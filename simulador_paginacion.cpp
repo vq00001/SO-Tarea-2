@@ -1,4 +1,4 @@
-#include "tabla_paginacion.h"
+#include "algoritmos_reemplazo.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
