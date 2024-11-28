@@ -51,31 +51,51 @@ int insertarLRU(std::vector<int>* referencias, int numMarcos, PageTable* tabla_p
     return fallosPagina;
 }
 
+/*
+* Algoritmo de reemplazo de página de reloj
+* @param referencias: vector de referencias de números de página
+* @param numMarcos: número de marcos de página
+* @param tabla_ptr: puntero a la tabla de páginas
+* @return int: número de fallos de página
+*/
+
 int insertarReloj(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr) {
     vector<int> referenciasVec = *referencias;
     vector<int> marcosReloj(numMarcos, -1);
     vector<int> bitsUso(numMarcos, 0);
     int punteroReloj = 0;
 
+    // para todas las paginas que seran referenciadas
     for (int numeroPagina : referenciasVec) {
         auto it = find(marcosReloj.begin(), marcosReloj.end(), numeroPagina);
+
+        // Si la página ya está en tabla, se marca como usada
         if (it != marcosReloj.end()) {
             int indice = distance(marcosReloj.begin(), it);
             bitsUso[indice] = 1;
         } else {
+            // Si la página no está en tabla, se reemplaza
+
+            // busca una pagina con bit de uso en 0, pone todos los bits 1 en 0
             while (bitsUso[punteroReloj] == 1) {
                 bitsUso[punteroReloj] = 0;
-                punteroReloj = (punteroReloj + 1) % numMarcos;
+                punteroReloj = (punteroReloj + 1) % numMarcos; 
             }
+
+            // si habia una pagina cargada en el marco, la elimina
             if (marcosReloj[punteroReloj] != -1) {
                 tabla_ptr->removePage(marcosReloj[punteroReloj]);
             }
+
+            // inserta la nueva pagina
             marcosReloj[punteroReloj] = numeroPagina;
             tabla_ptr->insertPage(numeroPagina, punteroReloj);
             bitsUso[punteroReloj] = 1;
             punteroReloj = (punteroReloj + 1) % numMarcos;
         }
+
     }
+
     int fallosPagina = tabla_ptr->getFallosPagina();
 
     return fallosPagina;
