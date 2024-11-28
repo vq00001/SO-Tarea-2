@@ -7,32 +7,9 @@
 #include <list>
 #include <vector>
 
-// struct EntradaPagina {
-//     int numeroMarco;
-//     bool valido;
-//     int bitUso; // Para el algoritmo del reloj
-// };
-
-// class PageTable {
-// private:
-//     std::unordered_map<int, EntradaPagina> tabla;
-//     std::queue<int> colaFIFO;
-//     std::list<int> listaLRU;
-//     std::vector<int> marcosReloj;
-//     std::vector<int> bitsUso;
-//     int punteroReloj = 0;
-//     int numMarcos;
-//     int fallosPagina = 0;
-
-// public:
-//     PageTable(int marcos);
-//     int obtenerFallosPagina() const;
-
-//     void insertarLRU(int numeroPagina);
-//     void insertarReloj(int numeroPagina);
-//     void insertarOptimo(int numeroPagina, std::vector<int>& referencias, int indiceActual);
-// };
-
 int insertarFIFO(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr);
+int insertarLRU(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr);
+int insertarReloj(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr);
+//int insertarOptimo(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr);
 
 #endif

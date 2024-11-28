@@ -72,13 +72,16 @@ int main(int argc, char* argv[]) {
         // Insertar las referencias en la tabla de páginas según el algoritmo
         if (algoritmoReemplazo == "FIFO") {
             fallosPagina = insertarFIFO(&referencias, marcos, &pageTable);
-        } /*else if (algoritmoReemplazo == string::LRU) {
-            insertarLRU(pageTable, pageNumber);
-        } else if (algoritmoReemplazo == string::CLOCK) {
-            insertarReloj(pageTable, pageNumber);
-        } else if (algoritmoReemplazo == string::OPTIMAL) {
-            insertarOptimo(pageTable, pageNumber, referencias, i);
-        }*/
+        } else if (algoritmoReemplazo == "LRU") {
+            fallosPagina = insertarLRU(&referencias, marcos, &pageTable);
+        } else if (algoritmoReemplazo == "CLOCK") {
+            fallosPagina = insertarReloj(&referencias, marcos, &pageTable);
+        } else if (algoritmoReemplazo == "OPTIMAL") {
+            //fallosPagina = insertarOptimo(&referencias, marcos, &pageTable);
+        } else {
+            cerr << "Algoritmo de reemplazo no válido.\n";
+            return 1;
+        }
 
         pageTable.displayTable();
         cout << "Fallos de página: " << fallosPagina << endl;

@@ -27,41 +27,59 @@ int insertarFIFO(std::vector<int>* referencias, int numMarcos, PageTable* tabla_
     return fallosPagina;
 }
 
-// void PageTable::insertarLRU(int numeroPagina) {
-//     auto it = tabla.find(numeroPagina);
-//     if (it != tabla.end()) {
-//         listaLRU.remove(numeroPagina);
-//         listaLRU.push_back(numeroPagina);
-//     } else {
-//         if (tabla.size() >= numMarcos) {
-//             int reemplazar = listaLRU.front();
-//             listaLRU.pop_front();
-//             tabla.erase(reemplazar);
-//         }
-//         tabla[numeroPagina] = {static_cast<int>(tabla.size()), true};
-//         listaLRU.push_back(numeroPagina);
-//         fallosPagina++;
-//     }
-// }
+int insertarLRU(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr) {
+    vector<int> referenciasVec = *referencias;
+    list<int> listaLRU;
 
-// void PageTable::insertarReloj(int numeroPagina) {
-//     auto it = std::find(marcosReloj.begin(), marcosReloj.end(), numeroPagina);
-//     if (it != marcosReloj.end()) {
-//         int indice = std::distance(marcosReloj.begin(), it);
-//         bitsUso[indice] = 1;
-//     } else {
-//         while (bitsUso[punteroReloj] == 1) {
-//             bitsUso[punteroReloj] = 0;
-//             punteroReloj = (punteroReloj + 1) % numMarcos;
-//         }
-//         tabla.erase(marcosReloj[punteroReloj]);
-//         marcosReloj[punteroReloj] = numeroPagina;
-//         tabla[numeroPagina] = {punteroReloj, true};
-//         bitsUso[punteroReloj] = 1;
-//         punteroReloj = (punteroReloj + 1) % numMarcos;
-//         fallosPagina++;
-//     }
-// }
+    for (int numeroPagina : referenciasVec) {
+        if (tabla_ptr->getFrame(numeroPagina) != -1) {
+            listaLRU.remove(numeroPagina);
+            listaLRU.push_back(numeroPagina);
+        } else {
+            if (static_cast<int>(listaLRU.size()) >= numMarcos) {
+                int reemplazar = listaLRU.front();
+                listaLRU.pop_front();
+                tabla_ptr->replacePage(numeroPagina, reemplazar);
+            } else {
+                tabla_ptr->insertPage(numeroPagina, static_cast<int>(listaLRU.size()));
+            }
+            listaLRU.push_back(numeroPagina);
+        }
+    }
+    int fallosPagina = tabla_ptr->getFallosPagina();
+
+    return fallosPagina;
+}
+
+int insertarReloj(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr) {
+    vector<int> referenciasVec = *referencias;
+    vector<int> marcosReloj(numMarcos, -1);
+    vector<int> bitsUso(numMarcos, 0);
+    int punteroReloj = 0;
+
+    for (int numeroPagina : referenciasVec) {
+        auto it = find(marcosReloj.begin(), marcosReloj.end(), numeroPagina);
+        if (it != marcosReloj.end()) {
+            int indice = distance(marcosReloj.begin(), it);
+            bitsUso[indice] = 1;
+        } else {
+            while (bitsUso[punteroReloj] == 1) {
+                bitsUso[punteroReloj] = 0;
+                punteroReloj = (punteroReloj + 1) % numMarcos;
+            }
+            if (marcosReloj[punteroReloj] != -1) {
+                tabla_ptr->removePage(marcosReloj[punteroReloj]);
+            }
+            marcosReloj[punteroReloj] = numeroPagina;
+            tabla_ptr->insertPage(numeroPagina, punteroReloj);
+            bitsUso[punteroReloj] = 1;
+            punteroReloj = (punteroReloj + 1) % numMarcos;
+        }
+    }
+    int fallosPagina = tabla_ptr->getFallosPagina();
+
+    return fallosPagina;
+}
 
 // void PageTable::insertarOptimo(int numeroPagina, std::vector<int>& referencias, int indiceActual) {
 //     if (tabla.find(numeroPagina) != tabla.end()) return;

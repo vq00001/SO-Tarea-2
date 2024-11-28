@@ -32,7 +32,7 @@ PageTable::PageTable(int frames) : numFrames(frames) {}
 void PageTable::insertPage(int pageNumber, int frameNumber) {
         
     // Verificar si el número de marco es válido
-    if (frameNumber >= numFrames || frameNumber < 0) {
+    if (frameNumber > numFrames || frameNumber < 0) {
         cout << "Número de marco inválido.\n";
         return;
     }
