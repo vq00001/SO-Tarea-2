@@ -27,13 +27,13 @@ vector<int> cargarReferencias(const string &filename) {
     // }
     // return referencias;
 
-    vector<int> references;
+    vector<int> referencias;
     int ref;
     while (archivo >> ref) {
-        references.push_back(ref);
+        referencias.push_back(ref);
     }
     archivo.close();
-    return references;
+    return referencias;
 }
 
 int main(int argc, char* argv[]) {
@@ -57,56 +57,36 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    vector<int> referencias;  // Vector de referencias de páginas
     PageTable tablaPaginacion(marcos);  // Crear tabla de páginas
 
-    try { // Iniciar simulación
-                    
-        referencias = cargarReferencias(archivoReferencias);    
+    cout << "Marcos: " << marcos << ", Algoritmo: " << algoritmo << ", Archivo: " << archivoReferencias << endl; // Mostrar argumentos (Solo para depuración)
 
-        // Insertar las referencias en la tabla de páginas (Simulación para pruebas)
-        for (size_t i = 0; i < referencias.size(); i++) {
-            int pageNumber = referencias[i];
-            if (tablaPaginacion.getFrame(pageNumber) == -1) {
-                cout << "Insertando página " << pageNumber << endl;
-                tablaPaginacion.insertPage(pageNumber, i % marcos);
-            }
-        }
- 
+    try { // Iniciar simulación
+        string algoritmoReemplazo = algoritmo;
+        vector<int> referencias = cargarReferencias(archivoReferencias);
+        int fallosPagina = 0;
+
+        // Crear la tabla de páginas con el número de marcos especificado
+        PageTable pageTable(marcos);
+
+        // Insertar las referencias en la tabla de páginas según el algoritmo
+        if (algoritmoReemplazo == "FIFO") {
+            fallosPagina = insertarFIFO(&referencias, marcos, &pageTable);
+        } /*else if (algoritmoReemplazo == string::LRU) {
+            insertarLRU(pageTable, pageNumber);
+        } else if (algoritmoReemplazo == string::CLOCK) {
+            insertarReloj(pageTable, pageNumber);
+        } else if (algoritmoReemplazo == string::OPTIMAL) {
+            insertarOptimo(pageTable, pageNumber, referencias, i);
+        }*/
+
+        pageTable.displayTable();
+        cout << "Fallos de página: " << fallosPagina << endl;
 
     } catch (const exception &e) { // Capturar excepciones
         cerr << "Error: " << e.what() << endl;
         return 1;
     }
-
-
-    tablaPaginacion.displayTable();  // Mostrar la tabla de páginas
-
-    int fallosPagina = 0;  
-
-    if (algoritmo == "FIFO") {
-        
-        fallosPagina = insertarFIFO(&referencias, marcos, &tablaPaginacion);
-    
-    // } else if (algoritmo == "LRU") {
-    //     for (int ref : referencias) {
-    //         tablaPaginacion.insertarLRU(ref);
-    //     }
-    // } else if (algoritmo == "CLOCK") {
-    //     for (int ref : referencias) {
-    //         tablaPaginacion.insertarReloj(ref);
-    //     }
-    // } else if (algoritmo == "OPTIMAL") {
-    //     for (size_t i = 0; i < referencias.size(); ++i) {
-    //         tablaPaginacion.insertarOptimo(referencias[i], referencias, i);
-    //     }
-    } else {
-        cerr << "Error: Algoritmo no reconocido.\n";
-        return 1;
-    }
-
-    
-    cout << "Fallos de página: " << fallosPagina << endl; 
 
     return 0;
 }

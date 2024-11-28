@@ -72,6 +72,12 @@ public:
      */
     void displayTable() const;
 
+    /**
+     * @brief Obtiene el número de fallos de página.
+     * @return int Número de fallos de página.
+     */
+    int getFallosPagina() const;
+
 private:
     unordered_map<int, PageEntry> table;  // Mapa de números de página a entradas de página.
     unordered_set<int> usedFrames;        // Conjunto de marcos físicos ocupados.

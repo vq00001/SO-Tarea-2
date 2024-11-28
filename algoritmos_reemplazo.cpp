@@ -2,31 +2,27 @@
 #include "tabla_paginacion.h"
 #include <iostream>
 #include <algorithm>
+
 using namespace std;
 
-
-int insertarFIFO(void* referencias_ptr, int numMarcos, void* tabla_ptr) {
-
-    vector<int> referencias = *(vector<int>*)referencias_ptr;
-    unordered_map<int, PageEntry> tabla = *(unordered_map<int, PageEntry>*)tabla_ptr;
+int insertarFIFO(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr) {
+    vector<int> referenciasVec = *referencias;
     queue<int> colaFIFO;
-    int fallosPagina = 0;
 
-    for (int numeroPagina : referencias) {
-
-        if (tabla.size() < numMarcos) {
-            tabla[numeroPagina] = {static_cast<int>(colaFIFO.size()), true};
-            colaFIFO.push(numeroPagina);
-            fallosPagina++;
-        } else {
-            int reemplazar = colaFIFO.front();
-            colaFIFO.pop();
-            colaFIFO.push(numeroPagina);
-            tabla.erase(reemplazar);
-            tabla[numeroPagina] = {static_cast<int>(colaFIFO.size()) - 1, true};
-            fallosPagina++;
+    for (int numeroPagina : referenciasVec) {
+        if (tabla_ptr->getFrame(numeroPagina) == -1) {
+            if (static_cast<int>(colaFIFO.size()) < numMarcos) {
+                colaFIFO.push(numeroPagina);
+                tabla_ptr->insertPage(numeroPagina, colaFIFO.back());
+            } else {
+                int reemplazar = colaFIFO.front();
+                colaFIFO.pop();
+                colaFIFO.push(numeroPagina);
+                tabla_ptr->replacePage(numeroPagina, reemplazar);
+            }
         }
     }
+    int fallosPagina = tabla_ptr->getFallosPagina();
 
     return fallosPagina;
 }

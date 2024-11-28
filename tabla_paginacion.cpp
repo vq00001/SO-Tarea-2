@@ -89,7 +89,7 @@ void PageTable::removePage(int pageNumber) {
         usedFrames.erase(it->second.frameNumber);
         table.erase(it);
         cout << "Página " << pageNumber << " eliminada.\n";
-        sleep(1000); // Simular un retraso de 1 segundo
+        sleep(1); // Simular un retraso de 1 segundo
     } else {
         cout << "Página " << pageNumber << " no encontrada.\n";
     }
@@ -129,4 +129,12 @@ void PageTable::displayTable() const {
     for (const auto& pair : table) {
         cout << "Página " << pair.first << ": [Marco: " << pair.second.frameNumber << ", Validez: " << pair.second.valid << "]\n";
     }
+}
+
+/**
+ * @brief Método para obtener el número de fallos de página
+ * @return Número de fallos de página
+ */
+int PageTable::getFallosPagina() const {
+    return pageFaults;
 }
