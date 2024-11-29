@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
     PageTable tablaPaginacion(marcos);  // Crear tabla de páginas
 
-    cout << "Marcos: " << marcos << ", Algoritmo: " << algoritmo << ", Archivo: " << archivoReferencias << endl; // Mostrar argumentos (Solo para depuración)
+    cout << "Marcos: " << marcos << ", Algoritmo: " << algoritmo << ", Archivo: " << archivoReferencias << endl << endl; // Mostrar argumentos 
 
     try { // Iniciar simulación
         string algoritmoReemplazo = algoritmo;
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
         }
 
         pageTable.displayTable();
-        cout << "Fallos de página: " << fallosPagina << endl;
+        cout << "\nFallos de página: " << fallosPagina << endl;
 
     } catch (const exception &e) { // Capturar excepciones
         cerr << "Error: " << e.what() << endl;

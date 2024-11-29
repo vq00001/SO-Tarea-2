@@ -11,6 +11,7 @@ int insertarFIFO(std::vector<int>* referencias, int numMarcos, PageTable* tabla_
 
     for (int numeroPagina : referenciasVec) {
         if (tabla_ptr->getFrame(numeroPagina) == -1) {
+
             if (static_cast<int>(colaFIFO.size()) < numMarcos) {
                 colaFIFO.push(numeroPagina);
                 tabla_ptr->insertPage(numeroPagina, colaFIFO.back());
@@ -20,6 +21,8 @@ int insertarFIFO(std::vector<int>* referencias, int numMarcos, PageTable* tabla_
                 colaFIFO.push(numeroPagina);
                 tabla_ptr->replacePage(numeroPagina, reemplazar);
             }
+        } else{
+            cout << "\nPágina " << numeroPagina << " encontrada en la tabla.\n";
         }
     }
     int fallosPagina = tabla_ptr->getFallosPagina();
@@ -33,9 +36,14 @@ int insertarLRU(std::vector<int>* referencias, int numMarcos, PageTable* tabla_p
 
     for (int numeroPagina : referenciasVec) {
         if (tabla_ptr->getFrame(numeroPagina) != -1) {
+            
+            cout << "\nPágina " << numeroPagina << " encontrada en la tabla.\n";
             listaLRU.remove(numeroPagina);
             listaLRU.push_back(numeroPagina);
         } else {
+
+          
+        
             if (static_cast<int>(listaLRU.size()) >= numMarcos) {
                 int reemplazar = listaLRU.front();
                 listaLRU.pop_front();
@@ -71,6 +79,9 @@ int insertarReloj(std::vector<int>* referencias, int numMarcos, PageTable* tabla
 
         // Si la página ya está en tabla, se marca como usada
         if (it != marcosReloj.end()) {
+           
+            cout << "\nPágina " << numeroPagina << " encontrada en la tabla.\n";
+        
             int indice = distance(marcosReloj.begin(), it);
             bitsUso[indice] = 1;
         } else {

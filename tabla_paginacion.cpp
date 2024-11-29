@@ -72,10 +72,10 @@ void PageTable::insertPage(int pageNumber, int frameNumber) {
 int PageTable::getFrame(int pageNumber) const {
     auto it = table.find(pageNumber);
     if (it != table.end() && it->second.valid) {
-        cout << "Página " << pageNumber << " encontrada en el marco " << it->second.frameNumber << ".\n";
+        // cout << "Página " << pageNumber << " encontrada en el marco " << it->second.frameNumber << ".\n";
         return it->second.frameNumber;
     }
-    cout << "Página " << pageNumber << " no encontrada.\n";
+    cout << "\nFallo de página: " << pageNumber << "\n";
     return -1;
 }
 
@@ -91,7 +91,7 @@ void PageTable::removePage(int pageNumber) {
         cout << "Página " << pageNumber << " eliminada.\n";
         usleep(100); // Simular un retraso de 1 segundo
     } else {
-        cout << "Página " << pageNumber << " no encontrada.\n";
+        cout << "\nPágina " << pageNumber << " no encontrada.\n";
     }
 }
 
@@ -118,14 +118,14 @@ void PageTable::replacePage(int pageNumber, int pageToReplace) {
     int frameNumber = getFrame(pageToReplace);
     removePage(pageToReplace);
     insertPage(pageNumber, frameNumber);
-    cout << "Página " << pageNumber << " reemplazada por el marco " << frameNumber << ".\n";
+    // cout << "Página " << pageNumber << " reemplazada por el marco " << frameNumber << ".\n";
 }
 
 /**
  * @brief Método para mostrar el contenido de la tabla
  */
 void PageTable::displayTable() const {
-    cout << "Contenido de la tabla de páginas:\n";
+    cout << "\nContenido de la tabla de páginas:\n";
     for (const auto& pair : table) {
         cout << "Página " << pair.first << ": [Marco: " << pair.second.frameNumber << ", Validez: " << pair.second.valid << "]\n";
     }
