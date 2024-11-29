@@ -10,6 +10,6 @@
 int insertarFIFO(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr);
 int insertarLRU(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr);
 int insertarReloj(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr);
-//int insertarOptimo(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr);
+int insertarOptimo(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr);
 
 #endif

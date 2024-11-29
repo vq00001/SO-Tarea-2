@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
         } else if (algoritmoReemplazo == "CLOCK") {
             fallosPagina = insertarReloj(&referencias, marcos, &pageTable);
         } else if (algoritmoReemplazo == "OPTIMAL") {
-            //fallosPagina = insertarOptimo(&referencias, marcos, &pageTable);
+            fallosPagina = insertarOptimo(&referencias, marcos, &pageTable);
         } else {
             cerr << "Algoritmo de reemplazo no válido.\n";
             return 1;

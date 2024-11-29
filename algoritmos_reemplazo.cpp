@@ -14,7 +14,7 @@ int insertarFIFO(std::vector<int>* referencias, int numMarcos, PageTable* tabla_
 
             if (static_cast<int>(colaFIFO.size()) < numMarcos) {
                 colaFIFO.push(numeroPagina);
-                tabla_ptr->insertPage(numeroPagina, colaFIFO.back());
+                tabla_ptr->insertPage(numeroPagina, colaFIFO.size()-1);
             } else {
                 int reemplazar = colaFIFO.front();
                 colaFIFO.pop();
@@ -112,22 +112,44 @@ int insertarReloj(std::vector<int>* referencias, int numMarcos, PageTable* tabla
     return fallosPagina;
 }
 
-// void PageTable::insertarOptimo(int numeroPagina, std::vector<int>& referencias, int indiceActual) {
-//     if (tabla.find(numeroPagina) != tabla.end()) return;
+int insertarOptimo(std::vector<int>* referencias, int numMarcos, PageTable* tabla_ptr) {
+    vector<int> referenciasVec = *referencias;
+    vector<int> cache;
+    list<int> reemplazos;
 
-//     if (tabla.size() < numMarcos) {
-//         tabla[numeroPagina] = {static_cast<int>(tabla.size()), true};
-//     } else {
-//         int indiceMasLejano = -1, reemplazar = -1;
-//         for (const auto& par : tabla) {
-//             int indiceFuturo = std::find(referencias.begin() + indiceActual, referencias.end(), par.first) - referencias.begin();
-//             if (indiceFuturo > indiceMasLejano || indiceFuturo == static_cast<int>(referencias.size())) {
-//                 indiceMasLejano = indiceFuturo;
-//                 reemplazar = par.first;
-//             }
-//         }
-//         tabla.erase(reemplazar);
-//         tabla[numeroPagina] = {tabla[reemplazar].numeroMarco, true};
-//     }
-//     fallosPagina++;
-// }
+    for (int i = 0; i < referenciasVec.size(); ++i) {
+        int numeroPagina = referenciasVec.at(i);
+        if (tabla_ptr->getFrame(numeroPagina) == -1) {
+            if (static_cast<int>(cache.size()) < numMarcos) {
+                cache.push_back(numeroPagina);
+                reemplazos.push_back(numeroPagina);
+                tabla_ptr->insertPage(numeroPagina, cache.size()-1);
+            }
+            else{
+                for (int j = i; j < referenciasVec.size(); ++j) {
+                    if(reemplazos.size() == 1 || referenciasVec.size()-1 == j){
+                        int quitar = reemplazos.front();
+                        auto it = std::find(cache.begin(), cache.end(), quitar);
+                        int indice = std::distance(cache.begin(), it);
+                        cache.at(indice) = numeroPagina;
+                        reemplazos.clear();
+                        for (int k = 0; k < cache.size(); ++k){
+                            reemplazos.push_back(cache.at(k));
+                        }
+                        tabla_ptr->replacePage(numeroPagina,quitar);
+                        break;
+                    }
+                    
+                    reemplazos.remove(referenciasVec.at(j));
+                       
+                    
+                }
+            }
+        }
+    }
+    return tabla_ptr->getFallosPagina();
+
+}
+
+
+//numeros.erase(std::remove(numeros.begin(), numeros.end(), valor_a_eliminar), numeros.end());
