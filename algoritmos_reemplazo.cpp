@@ -87,6 +87,7 @@ int insertarReloj(std::vector<int>* referencias, int numMarcos, PageTable* tabla
         } else {
             // Si la página no está en tabla, se reemplaza
 
+            cout << "\nFallo de página: " << numeroPagina << "\n";
             // busca una pagina con bit de uso en 0, pone todos los bits 1 en 0
             while (bitsUso[punteroReloj] == 1) {
                 bitsUso[punteroReloj] = 0;
@@ -120,6 +121,8 @@ int insertarOptimo(std::vector<int>* referencias, int numMarcos, PageTable* tabl
     for (int i = 0; i < referenciasVec.size(); ++i) {
         int numeroPagina = referenciasVec.at(i);
         if (tabla_ptr->getFrame(numeroPagina) == -1) {
+
+            
             if (static_cast<int>(cache.size()) < numMarcos) {
                 cache.push_back(numeroPagina);
                 reemplazos.push_back(numeroPagina);
@@ -145,6 +148,8 @@ int insertarOptimo(std::vector<int>* referencias, int numMarcos, PageTable* tabl
                     
                 }
             }
+        } else {
+            cout << "\nPágina " << numeroPagina << " encontrada en la tabla.\n";
         }
     }
     return tabla_ptr->getFallosPagina();
