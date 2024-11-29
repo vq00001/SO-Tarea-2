@@ -84,7 +84,8 @@ int main(int argc, char* argv[]) {
         }
 
         pageTable.displayTable();
-        cout << "\nFallos de página: " << fallosPagina << endl;
+        cout << "--------------------------------------------\n";
+        cout << "\nTotal fallos de página: " << fallosPagina << endl;
 
     } catch (const exception &e) { // Capturar excepciones
         cerr << "Error: " << e.what() << endl;
