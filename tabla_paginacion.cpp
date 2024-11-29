@@ -89,7 +89,7 @@ void PageTable::removePage(int pageNumber) {
         usedFrames.erase(it->second.frameNumber);
         table.erase(it);
         cout << "Página " << pageNumber << " eliminada.\n";
-        sleep(1); // Simular un retraso de 1 segundo
+        usleep(100); // Simular un retraso de 1 segundo
     } else {
         cout << "Página " << pageNumber << " no encontrada.\n";
     }
