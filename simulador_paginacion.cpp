@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 
 
     if (marcos <= 0 || algoritmo.empty() || archivoReferencias.empty()) {
-        cerr << "Uso: ./mvirtual -m <marcos> -a <algoritmo> -f <archivo>\n";
+        cerr << "Uso: ./<archivo.exe> -m <marcos> -a <algoritmo> -f <archivo>\n";
         return 1;
     }
 

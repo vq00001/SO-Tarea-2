@@ -152,4 +152,3 @@ int insertarOptimo(std::vector<int>* referencias, int numMarcos, PageTable* tabl
 }
 
 
-//numeros.erase(std::remove(numeros.begin(), numeros.end(), valor_a_eliminar), numeros.end());
